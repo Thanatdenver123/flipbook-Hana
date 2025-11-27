@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hana Photos</title>
+    <title>Photo Grid Flipbook</title>
     <script src="https://cdn.jsdelivr.net/npm/page-flip/dist/js/page-flip.browser.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         body, html {
             margin: 0;
@@ -12,255 +13,266 @@
             width: 100%;
             height: 100%;
             font-family: 'Sarabun', sans-serif;
+            background-color: #2a2a2a;
             overflow: hidden;
         }
 
-        /* ส่วนแสดงผลหลัก (Background) */
-        #main-container {
+        /* --- SCREEN 1: หน้าอัพโหลด --- */
+        #upload-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            transition: opacity 0.5s;
+        }
+
+        .upload-card {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .upload-icon {
+            font-size: 60px;
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+
+        /* --- SCREEN 2: หน้าแสดงหนังสือ --- */
+        #book-screen {
+            display: none; /* ซ่อนไว้ก่อน */
             width: 100%;
             height: 100vh;
-            background-color: #333; /* สีเริ่มต้น */
+            position: relative;
+            /* พื้นหลังเริ่มต้น */
+            background-color: #333; 
             background-size: cover;
             background-position: center;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: background 0.3s;
-            position: relative;
         }
 
-        /* ตัวเล่มหนังสือ */
-        .flip-book {
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            display: none; /* ซ่อนก่อนจนกว่าจะมีรูป */
-        }
-
+        /* --- การจัดวางรูป 4 รูปใน 1 หน้า (Grid Layout) --- */
         .page {
-            padding: 0;
-            background-color: #fdfaf7;
-            border: 1px solid #c2b5a3;
+            background-color: #fff;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
+            border: 1px solid #ddd;
             overflow: hidden;
         }
 
-        .page img {
+        .photo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* 2 คอลัมน์ */
+            grid-template-rows: 1fr 1fr;    /* 2 แถว */
             width: 100%;
             height: 100%;
-            object-fit: contain; /* ปรับรูปให้พอดีกรอบ */
+            padding: 10px;
+            box-sizing: border-box;
+            gap: 10px; /* ระยะห่างระหว่างรูป */
         }
 
-        .page-content {
+        .photo-item {
             width: 100%;
             height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 20px;
-            color: #888;
+            object-fit: cover; /* ตัดภาพให้เต็มช่อง */
+            border-radius: 4px;
+            border: 1px solid #eee;
+            background-color: #f9f9f9;
         }
 
-        /* แผงควบคุม (Control Panel) */
-        #controls {
+        /* --- UI Controls --- */
+        .btn {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 16px;
+            border: none;
+            transition: 0.3s;
+            display: inline-block;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+        .btn:hover { background-color: #0056b3; transform: translateY(-2px); }
+
+        input[type="file"] { display: none; }
+
+        /* Floating Toolbar หน้าดูหนังสือ */
+        #toolbar {
             position: absolute;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.9);
-            padding: 15px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 50px;
             display: flex;
             gap: 15px;
-            z-index: 100;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .control-group {
-            display: flex;
-            flex-direction: column;
             align-items: center;
+            z-index: 100;
+            backdrop-filter: blur(5px);
         }
-
-        label {
-            font-size: 12px;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-
-        input[type="file"] {
-            display: none;
-        }
-
-        .btn {
-            background-color: #007bff;
+        
+        .tool-btn {
+            background: none;
+            border: 1px solid rgba(255,255,255,0.3);
             color: white;
-            padding: 8px 16px;
-            border-radius: 5px;
+            padding: 5px 15px;
+            border-radius: 20px;
             cursor: pointer;
             font-size: 14px;
-            border: none;
-            transition: 0.2s;
         }
-
-        .btn:hover {
-            background-color: #0056b3;
-        }
-
-        .btn-secondary {
-            background-color: #6c757d;
-        }
-
-        input[type="color"] {
-            cursor: pointer;
-            border: none;
-            width: 50px;
-            height: 35px;
-        }
-
-        #loading {
-            position: absolute;
-            color: white;
-            font-size: 24px;
-            display: none;
-        }
+        .tool-btn:hover { background: rgba(255,255,255,0.2); }
 
     </style>
 </head>
 <body>
 
-    <div id="main-container">
-        
-        <div id="loading">กำลังสร้างหนังสือ...</div>
-
-        <div id="book-wrapper">
-            </div>
-
-        <div id="controls">
+    <div id="upload-screen">
+        <div class="upload-card">
+            <div class="upload-icon">📖</div>
+            <h2>สร้าง Photo Album Flipbook</h2>
+            <p style="color: #666; margin-bottom: 20px;">เลือกรูปภาพทั้งหมดที่คุณต้องการ (ระบบจะจัด 4 รูปต่อ 1 หน้าให้อัตโนมัติ)</p>
             
-            <div class="control-group">
-                <label>1. สร้างหนังสือ (เลือกหลายรูป)</label>
-                <label for="bookUpload" class="btn">📂 เลือกรูปภาพหน้าหนังสือ</label>
-                <input type="file" id="bookUpload" multiple accept="image/*">
-            </div>
+            <label for="bookUpload" class="btn">📂 เลือกรูปภาพทั้งหมด</label>
+            <input type="file" id="bookUpload" multiple accept="image/*">
+        </div>
+    </div>
 
-            <div style="border-left: 1px solid #ccc; margin: 0 10px;"></div>
+    <div id="book-screen">
+        <div id="book-wrapper" style="height: 100%; display: flex; justify-content: center; align-items: center;">
+            <div id="myBook"></div>
+        </div>
 
-            <div class="control-group">
-                <label>2. พื้นหลัง (รูปภาพ)</label>
-                <label for="bgUpload" class="btn btn-secondary">🖼️ อัพโหลด BG</label>
-                <input type="file" id="bgUpload" accept="image/*">
-            </div>
+        <div id="toolbar">
+            <button class="tool-btn" onclick="goBack()">⬅️ ทำเล่มใหม่</button>
+            
+            <label for="bgUpload" class="tool-btn" style="cursor: pointer;">🖼️ เปลี่ยนพื้นหลัง</label>
+            <input type="file" id="bgUpload" accept="image/*">
 
-            <div class="control-group">
-                <label>3. พื้นหลัง (สี)</label>
-                <input type="color" id="bgColor" value="#333333">
-            </div>
-
+            <input type="color" id="bgColor" value="#333333" style="width: 30px; height: 30px; border:none; cursor: pointer; border-radius: 50%;">
         </div>
     </div>
 
     <script>
-        // ตัวแปรสำหรับเก็บ Instance ของ Flipbook
         let pageFlip = null;
-        const mainContainer = document.getElementById('main-container');
-        const bookWrapper = document.getElementById('book-wrapper');
-        const loading = document.getElementById('loading');
+        const uploadScreen = document.getElementById('upload-screen');
+        const bookScreen = document.getElementById('book-screen');
+        const bookWrapper = document.getElementById('myBook');
 
-        // ฟังก์ชันเริ่มทำงานเมื่อโหลดไฟล์
-        document.addEventListener('DOMContentLoaded', () => {
-            // ยังไม่มีหนังสือ เริ่มต้นให้ว่างเปล่า หรือใส่คู่มือ
-            loading.style.display = 'block';
-            loading.innerText = 'กรุณาอัพโหลดรูปภาพเพื่อสร้างหนังสือ';
-        });
-
-        // ---------------------------------------------
-        // ฟังก์ชันจัดการ Flipbook
-        // ---------------------------------------------
+        // ฟังก์ชันเริ่มสร้างหนังสือ
         function createBook(images) {
-            // เคลียร์หนังสือเก่าทิ้ง (ถ้ามี)
-            bookWrapper.innerHTML = '<div class="flip-book" id="myBook"></div>';
-            const bookElement = document.getElementById('myBook');
+            // 1. เปลี่ยนหน้าจอ
+            uploadScreen.style.display = 'none';
+            bookScreen.style.display = 'block';
 
-            // สร้างหน้า HTML ตามจำนวนรูปภาพ
-            images.forEach((imgSrc) => {
+            // 2. เคลียร์ค่าเก่า
+            if (pageFlip) pageFlip.destroy();
+            bookWrapper.innerHTML = '';
+
+            // 3. จัดกลุ่มรูปภาพ กลุ่มละ 4 รูป (Chunking)
+            const itemsPerPage = 4;
+            
+            for (let i = 0; i < images.length; i += itemsPerPage) {
+                // ดึงรูปทีละ 4 รูปมาสร้างเป็น chunk
+                const chunk = images.slice(i, i + itemsPerPage);
+                
+                // สร้าง div ของหน้านั้นๆ
                 const pageDiv = document.createElement('div');
                 pageDiv.classList.add('page');
-                pageDiv.innerHTML = `<img src="${imgSrc}" draggable="false" />`;
-                bookElement.appendChild(pageDiv);
-            });
+                
+                // สร้าง Grid Container
+                const gridDiv = document.createElement('div');
+                gridDiv.classList.add('photo-grid');
 
-            // ตั้งค่า Flipbook (ขนาด, ความเงา, etc.)
-            // คำนวณขนาดหนังสือตามหน้าจอ (Responsive)
-            const width = window.innerWidth > 600 ? 400 : 300;
-            const height = window.innerWidth > 600 ? 600 : 450;
+                // วนลูปเอารูปใส่ลงใน Grid
+                chunk.forEach(imgSrc => {
+                    const img = document.createElement('img');
+                    img.src = imgSrc;
+                    img.classList.add('photo-item');
+                    img.draggable = false; // ป้องกันการลากรูปหลุด
+                    gridDiv.appendChild(img);
+                });
 
-            pageFlip = new St.PageFlip(bookElement, {
+                pageDiv.appendChild(gridDiv);
+                bookWrapper.appendChild(pageDiv);
+            }
+
+            // 4. เริ่มต้น PageFlip
+            const width = window.innerWidth > 600 ? 500 : 320;
+            const height = window.innerWidth > 600 ? 700 : 480;
+
+            pageFlip = new St.PageFlip(bookWrapper, {
                 width: width, 
                 height: height,
                 size: "fixed",
-                minWidth: 315,
-                minHeight: 420,
+                minWidth: 300,
                 maxWidth: 1000,
-                maxHeight: 1350,
-                maxShadowOpacity: 0.5, // ความเข้มเงา
-                showCover: true,
-                mobileScrollSupport: false 
+                minHeight: 400,
+                maxHeight: 1200,
+                showCover: true
             });
 
-            // โหลดหน้าทั้งหมดเข้า Flipbook
             pageFlip.loadFromHTML(document.querySelectorAll('.page'));
-            
-            bookElement.style.display = 'block';
-            loading.style.display = 'none';
         }
 
-        // ---------------------------------------------
-        // Event Listeners (รับค่าจากผู้ใช้)
-        // ---------------------------------------------
+        // --- Event Handlers ---
 
-        // 1. เมื่ออัพโหลดรูปหน้าหนังสือ (Upload Pages)
+        // เมื่อเลือกไฟล์รูป
         document.getElementById('bookUpload').addEventListener('change', function(e) {
-            const files = e.target.files;
+            const files = Array.from(e.target.files);
             if (files.length === 0) return;
 
-            loading.style.display = 'block';
-            loading.innerText = 'กำลังประมวลผล...';
-            
-            const imageUrls = [];
-            let filesLoaded = 0;
+            // เรียงไฟล์ตามชื่อ (optional)
+            files.sort((a, b) => a.name.localeCompare(b.name));
 
-            // อ่านไฟล์รูปทั้งหมดแปลงเป็น URL
-            for (let i = 0; i < files.length; i++) {
+            const imageUrls = [];
+            let loadedCount = 0;
+
+            files.forEach((file, index) => {
                 const reader = new FileReader();
-                reader.onload = function(event) {
-                    imageUrls[i] = event.target.result; // เก็บตามลำดับ index
-                    filesLoaded++;
-                    // เมื่อโหลดครบทุกรูป ให้สร้างหนังสือ
-                    if (filesLoaded === files.length) {
-                        createBook(imageUrls);
+                reader.onload = (event) => {
+                    // เราต้องเก็บแบบระบุ index เพื่อกันรูปสลับตำแหน่งถ้าโหลดเสร็จไม่พร้อมกัน
+                    imageUrls[index] = event.target.result;
+                    loadedCount++;
+                    if (loadedCount === files.length) {
+                        // กรอง array เผื่อมีช่องว่าง (ป้องกัน bug)
+                        const finalImages = imageUrls.filter(url => url !== undefined);
+                        createBook(finalImages);
                     }
-                }
-                reader.readAsDataURL(files[i]);
-            }
+                };
+                reader.readAsDataURL(file);
+            });
         });
 
-        // 2. เมื่ออัพโหลดภาพพื้นหลัง (Upload BG)
+        // ปุ่มย้อนกลับ
+        function goBack() {
+            bookScreen.style.display = 'none';
+            uploadScreen.style.display = 'flex';
+            document.getElementById('bookUpload').value = ''; // เคลียร์ค่า input
+        }
+
+        // เปลี่ยนพื้นหลัง (รูป)
         document.getElementById('bgUpload').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(event) {
-                    mainContainer.style.backgroundImage = `url(${event.target.result})`;
+                    bookScreen.style.backgroundImage = `url(${event.target.result})`;
                 }
                 reader.readAsDataURL(file);
             }
         });
 
-        // 3. เมื่อเปลี่ยนสีพื้นหลัง (Color Picker)
+        // เปลี่ยนพื้นหลัง (สี)
         document.getElementById('bgColor').addEventListener('input', function(e) {
-            // ลบรูปภาพออกก่อนเพื่อให้เห็นสี
-            mainContainer.style.backgroundImage = 'none';
-            mainContainer.style.backgroundColor = e.target.value;
+            bookScreen.style.backgroundImage = 'none';
+            bookScreen.style.backgroundColor = e.target.value;
         });
 
     </script>
