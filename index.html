@@ -3,311 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Blue Album</title>
-    <script src="https://cdn.jsdelivr.net/npm/page-flip/dist/js/page-flip.browser.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Mali:wght@400;600&family=Sarabun:wght@300;400&display=swap" rel="stylesheet">
-    
+    <title>Hana Cloud Album</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Mali:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        /* --- 🔵 BLUE THEME 🔵 --- */
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            font-family: 'Mali', 'Sarabun', sans-serif; 
-            background-color: #e0f7fa; /* สีฟ้าอ่อน */
-            overflow: hidden;
+        body {
+            margin: 0; padding: 0;
+            background-color: #e0f7fa;
+            font-family: 'Mali', cursive;
+            overflow: hidden; /* ป้องกัน Scrollbar ของ Browser */
+            display: flex; flex-direction: column; height: 100vh;
         }
-
-        /* --- SCREEN 1: หน้าโหลด/อัพโหลด --- */
-        #upload-screen {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background: linear-gradient(135deg, #e3f2fd 0%, #90caf9 100%);
-            transition: opacity 0.5s;
-        }
-
-        .upload-card {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 40px;
-            border-radius: 30px;
-            border: 4px dashed #4fc3f7; /* เส้นประสีฟ้าสด */
-            box-shadow: 0 10px 30px rgba(3, 169, 244, 0.2);
-            text-align: center;
-            max-width: 500px;
-            width: 90%;
-        }
-
-        .upload-icon { font-size: 60px; margin-bottom: 20px; }
-        .upload-card h2 { font-family: 'Fredoka One', cursive; color: #0288d1; } /* สีฟ้าเข้ม */
-
-        /* --- SCREEN 2: หน้าแสดงหนังสือ --- */
-        #book-screen {
-            display: none;
-            width: 100%;
-            height: 100vh;
-            position: relative;
-            background-color: #e1f5fe;
-            /* ลายก้อนเมฆ หรือลายจุดสีฟ้า */
-            background-image: radial-gradient(#81d4fa 20%, transparent 20%), radial-gradient(#81d4fa 20%, transparent 20%);
-            background-position: 0 0, 15px 15px;
-            background-size: 30px 30px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .cute-title {
-            font-family: 'Fredoka One', cursive;
-            color: #039be5;
-            font-size: 3.5em;
-            text-align: center;
-            margin-top: 10px;
-            margin-bottom: 5px;
-            text-shadow: 3px 3px 0px #fff, 5px 5px 0px rgba(0,0,0,0.1);
-            z-index: 10;
-        }
-
-        #book-wrapper-container {
+        /* ส่วนแสดงหนังสือ */
+        #book-container {
             flex-grow: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-            padding-bottom: 70px;
+            display: flex; justify-content: center; align-items: center;
+            background-image: radial-gradient(#81d4fa 20%, transparent 20%);
+            background-size: 30px 30px;
+            position: relative;
         }
-
-        /* --- 📖 หน้าหนังสือ (ปรับให้รูปใหญ่ขึ้น) --- */
-        .page {
-            background-color: #fff;
-            background-image: linear-gradient(#e0f7fa 1px, transparent 1px), linear-gradient(90deg, #e0f7fa 1px, transparent 1px);
-            background-size: 20px 20px;
-            border: 2px solid #4fc3f7;
-            border-radius: 10px;
-            overflow: hidden !important;
-            box-shadow: inset 0 0 20px rgba(3, 169, 244, 0.1);
-        }
-
-        .photo-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: 1fr 1fr;
-            width: 100%;
-            height: 100%;
-            padding: 8px; /* ลดขอบลงเพื่อให้รูปใหญ่ขึ้น */
-            box-sizing: border-box;
-            gap: 6px; /* ลดช่องว่างระหว่างรูป */
-        }
-
-        .grid-cell {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #fff;
-            border-radius: 6px;
-            border: 1px solid #b3e5fc;
-            overflow: hidden;
-            box-shadow: 1px 1px 3px rgba(0,0,0,0.05);
-            cursor: pointer; /* เปลี่ยนเมาส์เป็นรูปมือ */
-            transition: transform 0.2s;
+        .cute-title {
+            position: absolute; top: 10px; width: 100%; text-align: center;
+            font-family: 'Fredoka One', cursive; color: #0288d1;
+            font-size: 3em; text-shadow: 2px 2px white; z-index: 10; margin: 0;
         }
         
-        .grid-cell:hover {
-            transform: scale(1.02); /* ขยายเล็กน้อยเมื่อชี้ */
-            border-color: #0288d1;
+        /* สไตล์ Flipbook */
+        .page {
+            background-color: white; border: 1px solid #b3e5fc;
+            overflow: hidden; box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
         }
-
+        .photo-grid {
+            display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
+            gap: 5px; padding: 10px; width: 100%; height: 100%; box-sizing: border-box;
+        }
         .photo-item {
-            width: 100%;
-            height: 100%;
-            object-fit: cover; /* ใช้ Cover เพื่อให้รูปเต็มช่อง (ตัดขอบบ้าง) หรือใช้ contain ถ้าอยากเห็นครบ */
+            width: 100%; height: 100%; object-fit: cover;
+            border-radius: 5px; border: 1px dashed #4fc3f7;
         }
 
-        /* --- 🔍 Lightbox (ดูรูปใหญ่) --- */
-        #lightbox {
-            display: none;
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            backdrop-filter: blur(5px);
-        }
-
-        #lightbox img {
-            max-width: 90%;
-            max-height: 80%;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            margin-bottom: 20px;
-        }
-
-        .lightbox-controls {
-            display: flex;
-            gap: 15px;
-        }
-
-        .lb-btn {
-            background: #0288d1;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
-            border: none;
-            font-family: 'Mali', cursive;
-            cursor: pointer;
-            font-size: 16px;
-            transition: 0.3s;
-        }
-        .lb-btn:hover { background: #01579b; transform: scale(1.1); }
-        .lb-btn.close { background: #ff5252; }
-
-        /* --- Toolbar --- */
-        #toolbar {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.9);
-            padding: 8px 20px;
-            border-radius: 50px;
-            border: 2px solid #81d4fa;
-            display: flex;
-            gap: 10px;
-            align-items: center;
+        /* ส่วน Admin (อัพโหลด) ด้านล่าง */
+        #admin-panel {
+            background: white; padding: 10px 20px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex; gap: 10px; justify-content: center; align-items: center;
             z-index: 100;
         }
-        
-        .tool-btn {
-            background: none;
-            border: 1px solid #b3e5fc;
-            color: #0288d1;
-            padding: 6px 15px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-            display: flex; align-items: center;
-        }
-        .tool-btn:hover { background: #e1f5fe; }
         .btn {
-            background-color: #29b6f6;
-            color: white;
-            padding: 10px 25px;
-            border-radius: 30px;
-            cursor: pointer;
-            font-size: 18px;
-            border: none;
-            font-family: 'Fredoka One', cursive;
-            margin-top: 15px;
+            background: #0288d1; color: white; border: none;
+            padding: 8px 15px; border-radius: 20px; cursor: pointer;
         }
-
+        .btn:disabled { background: #ccc; }
+        #progress-bar { color: #0288d1; font-size: 14px; margin-left: 10px;}
+        
+        /* ซ่อน Input file */
+        input[type="file"] { display: none; }
     </style>
 </head>
 <body>
 
-    <div id="upload-screen">
-        <div class="upload-card">
-            <div class="upload-icon">☁️📸</div>
-            <h2>Blue Album Creator</h2>
-            <p style="color: #666;">(โหลดรูปจาก Drive หรือเลือกไฟล์เอง)</p>
-            <label for="bookUpload" class="btn">📂 อัพโหลดไฟล์เพิ่ม (ถ้ามี)</label>
-            <input type="file" id="bookUpload" multiple accept="image/*">
-            <div id="status-msg" style="margin-top:15px; color:#0288d1;"></div>
-        </div>
+    <div id="book-container">
+        <h1 class="cute-title">☁️ Hana Cloud Album ☁️</h1>
+        <div id="flipbook"></div>
     </div>
 
-    <div id="book-screen">
-        <h1 class="cute-title">☁️ My Photo Album ☁️</h1>
-        
-        <div id="book-wrapper-container">
-            <div id="myBook"></div>
-        </div>
-
-        <div id="toolbar">
-            <button class="tool-btn" onclick="goBack()">⬅️ หน้าหลัก</button>
-            <label for="bgUpload" class="tool-btn">🖼️ เปลี่ยน BG</label>
-            <input type="file" id="bgUpload" accept="image/*" style="display:none">
-            <input type="color" id="bgColor" value="#e0f7fa" style="width: 30px; height: 30px; border:none; border-radius:50%; cursor: pointer;">
-        </div>
+    <div id="admin-panel">
+        <label for="fileInput" class="btn">📸 อัพโหลดรูปเพิ่ม</label>
+        <input type="file" id="fileInput" multiple accept="image/*">
+        <span id="progress-bar"></span>
+        <button onclick="location.reload()" class="btn" style="background:#ff9800; margin-left:10px;">🔄 รีเฟรชดูรูปใหม่</button>
     </div>
 
-    <div id="lightbox" onclick="closeLightbox(event)">
-        <img id="lb-image" src="" alt="Full Size">
-        <div class="lightbox-controls">
-            <button class="lb-btn" onclick="downloadCurrentImg()">⬇️ ดาวน์โหลดรูปนี้</button>
-            <button class="lb-btn close" onclick="closeLightboxNow()">❌ ปิด</button>
-        </div>
-    </div>
+    <script type="module">
+        // --------------------------------------------------------------
+        // 1. นำเข้า Firebase Libraries
+        // --------------------------------------------------------------
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp } 
+            from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } 
+            from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+        // Library Flipbook
+        import { PageFlip } from "https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.module.js";
 
-    <script>
-        // ============================================================
-        // 🔵 ส่วนใส่ลิงก์ Google Drive (สำคัญ!) 🔵
-        // ============================================================
-        // นำลิงก์ที่ได้จากการกด Share > Copy Link มาวางตรงนี้ครับ
-        
-        const GOOGLE_DRIVE_LINKS = [
-         https://drive.google.com/drive/u/0/folders/1o8A0-yhgEnZUhaOil2cXLqVownK6sXua
-        ];
+        // --------------------------------------------------------------
+        // 2. 🔴 แก้ไข CONFIG ตรงนี้ (เอามาจาก Firebase Console) 🔴
+        // --------------------------------------------------------------
+        const firebaseConfig = {
+            apiKey: "AIzaSyAucrakrZR2QeEozkoptBoJYKCTDsKxyvI",
+  authDomain: "hana-photos.firebaseapp.com",
+  projectId: "hana-photos",
+  storageBucket: "hana-photos.firebasestorage.app",
+  messagingSenderId: "761819517814",
+  appId: "1:761819517814:web:bedb5afcad4752d37f2057",
+  measurementId: "G-48DKXLY0Z8"
+        };
 
-        // ============================================================
+        // เริ่มต้น Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+        const COLLECTION_NAME = "hana_photos"; // ชื่อตารางเก็บข้อมูล
 
-        let pageFlip = null;
-        const uploadScreen = document.getElementById('upload-screen');
-        const bookScreen = document.getElementById('book-screen');
-        const bookWrapper = document.getElementById('myBook');
-        const statusMsg = document.getElementById('status-msg');
+        // --------------------------------------------------------------
+        // 3. ฟังก์ชันโหลดหนังสือ (ทำงานทันทีเมื่อเปิดเว็บ)
+        // --------------------------------------------------------------
+        async function loadBook() {
+            const status = document.getElementById('progress-bar');
+            status.innerText = "กำลังดึงข้อมูล...";
 
-        // ฟังก์ชันแปลงลิงก์ Drive ทั่วไป เป็นลิงก์สำหรับแสดงรูป (Direct Link)
-        function convertDriveLink(url) {
             try {
-                // หา ID ของไฟล์จาก URL
-                let id = "";
-                if (url.includes("/file/d/")) {
-                    id = url.split("/file/d/")[1].split("/")[0];
-                } else if (url.includes("id=")) {
-                    id = url.split("id=")[1].split("&")[0];
-                }
+                // ดึงข้อมูลจาก Firestore เรียงตามเวลาที่อัพโหลด
+                const q = query(collection(db, COLLECTION_NAME), orderBy("createdAt", "asc"));
+                const querySnapshot = await getDocs(q);
                 
-                if (id) {
-                    // ใช้ lh3.googleusercontent.com เพื่อโหลดรูปเร็วขึ้นและรองรับ CORS ดีกว่า
-                    return `https://drive.google.com/uc?export=view&id=${id}`; 
+                let images = [];
+                querySnapshot.forEach((doc) => {
+                    images.push(doc.data().url);
+                });
+
+                if (images.length === 0) {
+                    status.innerText = "ยังไม่มีรูปภาพในระบบ";
+                    return;
                 }
-                return url; // ถ้าไม่ใช่ลิงก์ Drive ก็คืนค่าเดิม
-            } catch (e) {
-                return url;
+
+                status.innerText = `โหลดเสร็จสิ้น (${images.length} รูป)`;
+                createFlipBook(images);
+
+            } catch (error) {
+                console.error("Error loading book:", error);
+                status.innerText = "เกิดข้อผิดพลาดในการโหลด (ตรวจสอบ Console)";
             }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            if (GOOGLE_DRIVE_LINKS.length > 0) {
-                statusMsg.innerText = "กำลังดึงรูปจาก Google Drive...";
-                // แปลงลิงก์ทั้งหมด
-                const processedLinks = GOOGLE_DRIVE_LINKS.map(link => convertDriveLink(link));
-                // สร้างหนังสือทันที
-                setTimeout(() => {
-                    createBook(processedLinks);
-                }, 1000);
-            }
-        });
+        // สร้าง Flipbook จาก Array รูปภาพ
+        function createFlipBook(images) {
+            const container = document.getElementById('flipbook');
+            container.innerHTML = ''; // เคลียร์ของเก่า
 
-        function createBook(images) {
-            uploadScreen.style.display = 'none';
-            bookScreen.style.display = 'flex';
-
-            if (pageFlip) pageFlip.destroy();
-            bookWrapper.innerHTML = '';
-
-            const itemsPerPage = 4; // จำนวนรูปต่อหน้า (4 รูป)
+            const itemsPerPage = 4; // 4 รูปต่อหน้า
             
+            // สร้างโครงสร้าง HTML
             for (let i = 0; i < images.length; i += itemsPerPage) {
                 const chunk = images.slice(i, i + itemsPerPage);
                 
@@ -317,118 +152,66 @@
                 const gridDiv = document.createElement('div');
                 gridDiv.classList.add('photo-grid');
 
-                chunk.forEach(imgSrc => {
-                    const cellDiv = document.createElement('div');
-                    cellDiv.classList.add('grid-cell');
-                    // เพิ่ม Event คลิกเพื่อเปิดรูปใหญ่
-                    cellDiv.onclick = () => openLightbox(imgSrc);
-
+                chunk.forEach(url => {
                     const img = document.createElement('img');
-                    img.src = imgSrc;
-                    img.classList.add('photo-item');
-                    img.draggable = false;
-                    
-                    cellDiv.appendChild(img);
-                    gridDiv.appendChild(cellDiv);
+                    img.src = url;
+                    img.className = 'photo-item';
+                    gridDiv.appendChild(img);
                 });
 
                 pageDiv.appendChild(gridDiv);
-                bookWrapper.appendChild(pageDiv);
+                container.appendChild(pageDiv);
             }
 
-            // ตั้งค่า Flipbook ให้เต็มตาขึ้น
+            // เริ่มต้น Library PageFlip
             const isMobile = window.innerWidth < 600;
-            
-            pageFlip = new St.PageFlip(bookWrapper, {
-                width: isMobile ? 320 : 500, 
-                height: isMobile ? 480 : 700,
+            const pageFlip = new PageFlip(container, {
+                width: isMobile ? 320 : 450,
+                height: isMobile ? 480 : 600,
                 size: "fixed",
-                minWidth: 300,
-                maxWidth: 1000,
-                minHeight: 400,
-                maxHeight: 1200,
-                showCover: true,
-                drawShadow: true,
-                maxShadowOpacity: 0.3
+                showCover: true
             });
-
             pageFlip.loadFromHTML(document.querySelectorAll('.page'));
         }
 
-        // --- Lightbox Functions ---
-        const lightbox = document.getElementById('lightbox');
-        const lbImage = document.getElementById('lb-image');
-        let currentImgSrc = "";
+        // --------------------------------------------------------------
+        // 4. ฟังก์ชันอัพโหลดรูป (เมื่อเลือกไฟล์)
+        // --------------------------------------------------------------
+        const fileInput = document.getElementById('fileInput');
+        fileInput.addEventListener('change', async (e) => {
+            const files = e.target.files;
+            if (!files.length) return;
 
-        function openLightbox(src) {
-            currentImgSrc = src;
-            lbImage.src = src;
-            lightbox.style.display = 'flex';
-        }
+            const status = document.getElementById('progress-bar');
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                status.innerText = `กำลังอัพโหลด... ${i+1}/${files.length}`;
+                
+                try {
+                    // 1. อัพไฟล์ขึ้น Storage
+                    const storageRef = ref(storage, 'hana-album/' + Date.now() + '-' + file.name);
+                    await uploadBytes(storageRef, file);
+                    const downloadURL = await getDownloadURL(storageRef);
 
-        function closeLightbox(e) {
-            // ปิดเมื่อคลิกพื้นที่ว่าง (Background)
-            if (e.target === lightbox) {
-                lightbox.style.display = 'none';
-            }
-        }
-        
-        function closeLightboxNow() {
-            lightbox.style.display = 'none';
-        }
+                    // 2. บันทึกลิงก์ลง Firestore
+                    await addDoc(collection(db, COLLECTION_NAME), {
+                        url: downloadURL,
+                        createdAt: serverTimestamp()
+                    });
 
-        function downloadCurrentImg() {
-            if (!currentImgSrc) return;
-            const link = document.createElement('a');
-            link.href = currentImgSrc;
-            link.download = 'hana-photo.jpg'; // ชื่อไฟล์ตอนโหลด
-            link.target = '_blank';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        // --- Event Handlers อื่นๆ ---
-        document.getElementById('bookUpload').addEventListener('change', function(e) {
-            const files = Array.from(e.target.files);
-            if (files.length === 0) return;
-            const imageUrls = [];
-            let loadedCount = 0;
-            files.forEach((file, index) => {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    imageUrls[index] = event.target.result;
-                    loadedCount++;
-                    if (loadedCount === files.length) {
-                        createBook(imageUrls.filter(url => url));
-                    }
-                };
-                reader.readAsDataURL(file);
-            });
-        });
-
-        function goBack() {
-            bookScreen.style.display = 'none';
-            uploadScreen.style.display = 'flex';
-            document.getElementById('bookUpload').value = '';
-        }
-
-        document.getElementById('bgUpload').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    bookScreen.style.backgroundImage = `url(${event.target.result})`;
-                    bookScreen.style.backgroundSize = 'cover';
+                } catch (error) {
+                    console.error("Upload failed:", error);
+                    alert("อัพโหลดล้มเหลว: " + file.name);
                 }
-                reader.readAsDataURL(file);
             }
+            
+            status.innerText = "✅ อัพโหลดเรียบร้อย! กรุณากดปุ่มรีเฟรช";
+            fileInput.value = ''; // เคลียร์ input
         });
 
-        document.getElementById('bgColor').addEventListener('input', function(e) {
-            bookScreen.style.backgroundImage = 'none';
-            bookScreen.style.backgroundColor = e.target.value;
-        });
+        // เรียกใช้งานครั้งแรก
+        loadBook();
 
     </script>
 </body>
