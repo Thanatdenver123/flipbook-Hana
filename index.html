@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hana Cloud Album</title>
+    <title>Hana Photos Album</title>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Mali:wght@400;600&display=swap" rel="stylesheet">
     <style>
         body {
             margin: 0; padding: 0;
             background-color: #e0f7fa;
             font-family: 'Mali', cursive;
-            overflow: hidden; /* ป้องกัน Scrollbar ของ Browser */
+            overflow: hidden;
             display: flex; flex-direction: column; height: 100vh;
         }
         /* ส่วนแสดงหนังสือ */
@@ -41,7 +41,7 @@
             border-radius: 5px; border: 1px dashed #4fc3f7;
         }
 
-        /* ส่วน Admin (อัพโหลด) ด้านล่าง */
+        /* ส่วน Admin (อัพโหลด) */
         #admin-panel {
             background: white; padding: 10px 20px;
             box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
@@ -51,43 +51,38 @@
         .btn {
             background: #0288d1; color: white; border: none;
             padding: 8px 15px; border-radius: 20px; cursor: pointer;
+            font-family: 'Mali', cursive;
         }
         .btn:disabled { background: #ccc; }
         #progress-bar { color: #0288d1; font-size: 14px; margin-left: 10px;}
-        
-        /* ซ่อน Input file */
         input[type="file"] { display: none; }
     </style>
 </head>
 <body>
 
     <div id="book-container">
-        <h1 class="cute-title">☁️ Hana Cloud Album ☁️</h1>
+        <h1 class="cute-title">🌸 Hana Photos 🌸</h1>
         <div id="flipbook"></div>
     </div>
 
     <div id="admin-panel">
         <label for="fileInput" class="btn">📸 อัพโหลดรูปเพิ่ม</label>
         <input type="file" id="fileInput" multiple accept="image/*">
-        <span id="progress-bar"></span>
+        <span id="progress-bar">สถานะ: พร้อมใช้งาน</span>
         <button onclick="location.reload()" class="btn" style="background:#ff9800; margin-left:10px;">🔄 รีเฟรชดูรูปใหม่</button>
     </div>
 
     <script type="module">
-        // --------------------------------------------------------------
-        // 1. นำเข้า Firebase Libraries
-        // --------------------------------------------------------------
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp } 
             from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } 
             from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
-        // Library Flipbook
         import { PageFlip } from "https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.module.js";
 
-        // --------------------------------------------------------------
-        // 2. 🔴 แก้ไข CONFIG ตรงนี้ (เอามาจาก Firebase Console) 🔴
-        // --------------------------------------------------------------
+        // ============================================================
+        // 🔴 แก้ไขตรงนี้: เอาค่าจาก Firebase Project 'hana-photos' มาใส่ 🔴
+        // ============================================================
         const firebaseConfig = {
             apiKey: "AIzaSyAucrakrZR2QeEozkoptBoJYKCTDsKxyvI",
   authDomain: "hana-photos.firebaseapp.com",
@@ -97,22 +92,20 @@
   appId: "1:761819517814:web:bedb5afcad4752d37f2057",
   measurementId: "G-48DKXLY0Z8"
         };
+        // ============================================================
 
         // เริ่มต้น Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const storage = getStorage(app);
-        const COLLECTION_NAME = "hana_photos"; // ชื่อตารางเก็บข้อมูล
+        const COLLECTION_NAME = "album_photos"; 
 
-        // --------------------------------------------------------------
-        // 3. ฟังก์ชันโหลดหนังสือ (ทำงานทันทีเมื่อเปิดเว็บ)
-        // --------------------------------------------------------------
+        // โหลดหนังสือ
         async function loadBook() {
             const status = document.getElementById('progress-bar');
             status.innerText = "กำลังดึงข้อมูล...";
 
             try {
-                // ดึงข้อมูลจาก Firestore เรียงตามเวลาที่อัพโหลด
                 const q = query(collection(db, COLLECTION_NAME), orderBy("createdAt", "asc"));
                 const querySnapshot = await getDocs(q);
                 
@@ -131,21 +124,24 @@
 
             } catch (error) {
                 console.error("Error loading book:", error);
-                status.innerText = "เกิดข้อผิดพลาดในการโหลด (ตรวจสอบ Console)";
+                // เช็ค Error ยอดฮิต
+                if(error.code === 'permission-denied') {
+                    status.innerText = "⚠️ Error: สิทธิ์ถูกปฏิเสธ (ไปแก้ Rules ใน Firebase)";
+                } else {
+                    status.innerText = "เกิดข้อผิดพลาดในการโหลด (กด F12 ดู Console)";
+                }
             }
         }
 
-        // สร้าง Flipbook จาก Array รูปภาพ
+        // สร้าง Flipbook
         function createFlipBook(images) {
             const container = document.getElementById('flipbook');
-            container.innerHTML = ''; // เคลียร์ของเก่า
+            container.innerHTML = ''; 
 
-            const itemsPerPage = 4; // 4 รูปต่อหน้า
+            const itemsPerPage = 4;
             
-            // สร้างโครงสร้าง HTML
             for (let i = 0; i < images.length; i += itemsPerPage) {
                 const chunk = images.slice(i, i + itemsPerPage);
-                
                 const pageDiv = document.createElement('div');
                 pageDiv.classList.add('page');
                 
@@ -163,7 +159,6 @@
                 container.appendChild(pageDiv);
             }
 
-            // เริ่มต้น Library PageFlip
             const isMobile = window.innerWidth < 600;
             const pageFlip = new PageFlip(container, {
                 width: isMobile ? 320 : 450,
@@ -174,9 +169,7 @@
             pageFlip.loadFromHTML(document.querySelectorAll('.page'));
         }
 
-        // --------------------------------------------------------------
-        // 4. ฟังก์ชันอัพโหลดรูป (เมื่อเลือกไฟล์)
-        // --------------------------------------------------------------
+        // อัพโหลดรูป
         const fileInput = document.getElementById('fileInput');
         fileInput.addEventListener('change', async (e) => {
             const files = e.target.files;
@@ -189,12 +182,12 @@
                 status.innerText = `กำลังอัพโหลด... ${i+1}/${files.length}`;
                 
                 try {
-                    // 1. อัพไฟล์ขึ้น Storage
-                    const storageRef = ref(storage, 'hana-album/' + Date.now() + '-' + file.name);
+                    // อัพไฟล์
+                    const storageRef = ref(storage, 'uploads/' + Date.now() + '-' + file.name);
                     await uploadBytes(storageRef, file);
                     const downloadURL = await getDownloadURL(storageRef);
 
-                    // 2. บันทึกลิงก์ลง Firestore
+                    // บันทึก DB
                     await addDoc(collection(db, COLLECTION_NAME), {
                         url: downloadURL,
                         createdAt: serverTimestamp()
@@ -202,17 +195,15 @@
 
                 } catch (error) {
                     console.error("Upload failed:", error);
-                    alert("อัพโหลดล้มเหลว: " + file.name);
+                    status.innerText = "⚠️ อัพโหลดล้มเหลว (เช็ค Rules หรือ Config)";
                 }
             }
             
-            status.innerText = "✅ อัพโหลดเรียบร้อย! กรุณากดปุ่มรีเฟรช";
-            fileInput.value = ''; // เคลียร์ input
+            status.innerText = "✅ อัพโหลดเรียบร้อย! กดรีเฟรชได้เลย";
+            fileInput.value = ''; 
         });
 
-        // เรียกใช้งานครั้งแรก
         loadBook();
-
     </script>
 </body>
 </html>
